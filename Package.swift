@@ -4,23 +4,34 @@
 import PackageDescription
 
 let package = Package(
-    name: "Signals",
+    name: "Ripple",
+    platforms: [
+        .iOS(.v13),
+        .macOS(.v10_15),
+        .tvOS(.v13),
+        .watchOS(.v6)
+    ],
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
-            name: "Signals",
-            targets: ["Signals"]
+            name: "Ripple", targets: ["Ripple"],
         ),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
         .target(
-            name: "Signals"
+            name: "Ripple",
+            swiftSettings: [
+                .defaultIsolation(MainActor.self)
+            ]
         ),
         .testTarget(
-            name: "SignalsTests",
-            dependencies: ["Signals"]
+            name: "RippleTests",
+            dependencies: ["Ripple"],
+            swiftSettings: [
+                .defaultIsolation(MainActor.self)
+            ]
         ),
     ]
 )

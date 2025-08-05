@@ -11,11 +11,11 @@ import Ripple
 @Atom var count = 0
 @Derived var title = "Count: \(count)"
 
-let render = Effect {                // keep the Effect alive
-    label.text = title               // auto-updates when count changes
+let render = Effect {     // keep the Effect alive
+    label.text = title    // auto-updates when count changes
 }
 
-count += 1                            // → title recomputes → effect runs
+count += 1                // → title recomputes → effect runs
 ```
 
 ## Outline
@@ -24,10 +24,10 @@ count += 1                            // → title recomputes → effect runs
   - [Installation](#installation)
     - [Swift Package Manager](#swift-package-manager)
   - [Concepts](#concepts)
-  - [Testing \& isolation](#testing--isolation)
+  - [Testing & isolation](#testing--isolation)
   - [Threading model](#threading-model)
   - [Behavior details](#behavior-details)
-  - [API surface (public types)](#api-surface-public-types)
+  - [API](#api)
   - [Examples](#examples)
     - [UIKit binding](#uikit-binding)
     - [Chained derived values](#chained-derived-values)

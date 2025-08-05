@@ -22,6 +22,7 @@ count += 1                // → title recomputes → effect runs
 - [Installation](#installation)
     - [Swift Package Manager](#swift-package-manager)
 - [Concepts](#concepts)
+    - [Convenience forms](#convenience-forms)
 - [Testing & isolation](#testing--isolation)
 - [Behavior details](#behavior-details)
 - [Examples](#examples)
@@ -77,6 +78,31 @@ bag.append(Effect {
 })
 ```
 Runs once on creation and after every relevant mutation.
+
+### Convenience forms
+The property‑wrapper syntax is most succinct, but Ripple also exposes
+low‑level factory helpers that return the underlying nodes. This is useful when you
+need explicit type annotations or want to store the nodes in collections.
+
+| Purpose | Property‑wrapper | Factory function |
+|---------|------------------|------------------|
+| Mutable state | `@Atom var count = 0` | `let count = atom(0)` |
+| Cached value  | `@Derived var total = price * qty` | `let total: Derivation<Int> = derive { price * qty }` |
+
+Both forms interoperate:
+
+```swift
+@Atom var price = 10
+let qty = atom(2)
+
+@Derived var total = price * qty.value // wrapper + node
+let tax = derive { total + 1 } // node based on wrapper
+
+print(tax.value) // 21
+```
+
+Choose whichever style reads best in a given context; under the hood they
+all participate in the same dependency graph.
 
 ## Testing & isolation
 
@@ -137,10 +163,16 @@ let e = Effect { print(d3) }     // prints 20, then 36 when a = 3
 @Test
 func isolatedGraphs() async {
   let r1: Int = await withIsolatedRuntime {
-    @Atom var x = 1; @Atom var y = 2; @Derived var s = x + y; return s
+    @Atom var x = 1 
+    @Atom var y = 2
+    @Derived var s = x + y
+    return s
   }
   let r2: Int = await withIsolatedRuntime {
-    @Atom var x = 10; @Atom var y = 20; @Derived var s = x + y; return s
+    @Atom var x = 10
+    @Atom var y = 20
+    @Derived var s = x + y
+    return s
   }
   #expect(r1 == 3 && r2 == 30)
 }

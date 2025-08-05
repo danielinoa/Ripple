@@ -1,9 +1,8 @@
 
 # Ripple
 
-A tiny, dependency-tracked reactivity runtime for Swift.
-Use `@Atom` for mutable state, `@Derived` for cached computations, and `Effect` for side-effects. 
-Ripple automatically records **what you read** while code runs, and **re-runs** dependents when those values change (no manual wiring).
+A reactivity runtime for Swift that automatically records state while code runs, and **re-runs** dependents when those values change.
+Ripple is designed to run on the **main actor**.
 
 ```swift
 import Ripple
@@ -11,8 +10,8 @@ import Ripple
 @Atom var count = 0
 @Derived var title = "Count: \(count)"
 
-let render = Effect {     // keep the Effect alive
-    label.text = title    // auto-updates when count changes
+let render = Effect {     // → keep the Effect alive
+    label.text = title    // → auto-updates when count changes
 }
 
 count += 1                // → title recomputes → effect runs
@@ -25,23 +24,21 @@ count += 1                // → title recomputes → effect runs
     - [Swift Package Manager](#swift-package-manager)
   - [Concepts](#concepts)
   - [Testing & isolation](#testing--isolation)
-  - [Threading model](#threading-model)
   - [Behavior details](#behavior-details)
-  - [API](#api)
   - [Examples](#examples)
     - [UIKit binding](#uikit-binding)
     - [Chained derived values](#chained-derived-values)
     - [Parallel-safe tests](#parallel-safe-tests)
-  - [Roadmap](#notes--roadmap)
+  - [Roadmap](#roadmap)
   - [License](#license)
 
 ## Features
-* **Ergonomic API** — `@Atom var count = 0`, `@Derived var title = "Count: \(count)"`.
-* **Fine-grained tracking** — only recompute what actually depends on what changed.
-* **Memoized computed values** — `@Derived` caches and invalidates on upstream mutations.
-* **Side effects** — `Effect { … }` runs once up-front and whenever its inputs change.
-* **Test isolation** — `withIsolatedRuntime { … }` gives each test a fresh graph.
-* **No macros, no Combine** — simple value semantics and identity-based graphs.
+* **Ergonomic API**: `@Atom var count = 0`, `@Derived var title = "Count: \(count)"`.
+* **Fine-grained tracking**: only recompute what actually depends on what changed.
+* **Memoized computed values**: `@Derived` caches and invalidates on upstream mutations.
+* **Side effects**: `Effect { … }` runs once up-front and whenever its inputs change.
+* **Test isolation**: `withIsolatedRuntime { … }` gives each test a fresh graph.
+* **No macros, no Combine**: simple value semantics and identity-based graphs.
 
 ## Installation
 
@@ -54,7 +51,7 @@ Add the package in Xcode (**File → Add Packages…**) or declare it in `Packag
 
 ## Concepts
 
-### `@Atom` (mutable, tracked state)
+### `@Atom`: The fundamental “state” type.
 ```swift
 @Atom var name = "Ripple"
 name = "Ripple 2"           // notifies dependents if value actually changed
@@ -63,7 +60,7 @@ print($name)                // `$` exposes the AtomObject
 * Reads link the current subscriber.
 * Writes call `Runtime.didMutate` **only if the value changes** (`Equatable`).
 
-### `@Derived` (cached, re-evaluated value)
+### `@Derived`: A **cached, read-only value** that is *derived* from other state.
 ```swift
 @Atom var x = 1
 @Atom var y = 2
@@ -71,7 +68,7 @@ print($name)                // `$` exposes the AtomObject
 ```
 If `T : Equatable`, Ripple skips propagation when the recomputed value equals the cached one.
 
-### `Effect` (side-effects that follow your data)
+### `Effect`: An observer that fires when its enclosed dependencies change.
 ```swift
 @Atom var count = 0
 var bag: [Effect] = []
@@ -96,16 +93,6 @@ func example() {
 ```
 `withIsolatedRuntime` (sync & async overloads) swaps `Runtime.current` with a fresh graph for the duration of the task tree.
 
-## Threading model
-Ripple is designed to run on the **main actor**.
-
-```swift
-Task.detached {
-    let heavy = await expensiveWork()
-    await MainActor.run { count = heavy }
-}
-```
-
 ## Behavior details
 | Item | Behaviour |
 |------|-----------|
@@ -113,54 +100,6 @@ Task.detached {
 | **Derived cache** | Recompute on first read or after any dependency mutates. |
 | **Derived equality** | If `T : Equatable`, skip propagation when value is unchanged. |
 | **Effect lifetime** | Runs while at least one strong reference exists; unsubscribes on deinit. |
-
-## API
-
-```swift
-protocol Publisher : AnyObject                // identity + helper
-protocol Subscriber : AnyObject { func run() }
-
-final class Runtime {
-    static var current: Runtime
-    func register(_ subscriber: Subscriber)
-    func unregister(subscriber: Subscriber)
-    func unregister(publisher: Publisher)
-    func willRead(_ publisher: Publisher)
-    func didMutate(_ publisher: Publisher)
-}
-
-final class AtomObject<T: Equatable> : Publisher {
-    public var value: T
-}
-func atom<T: Equatable>(_ value: T) -> AtomObject<T>
-
-@propertyWrapper struct Atom<T: Equatable> {
-    var wrappedValue: T
-    var projectedValue: AtomObject<T>
-}
-
-final class Derivation<T> : Publisher, Subscriber {
-    var value: T                    // read-only
-    func run()
-}
-func derive<T>(_ body: @escaping () -> T) -> Derivation<T>
-
-@propertyWrapper struct Derived<T> {
-    var wrappedValue: T
-    var projectedValue: Derived<T>
-}
-
-final class Effect : Subscriber {
-    init(_ body: @escaping () -> Void)
-    func run()
-}
-
-// Test helpers
-enum RippleContext { @TaskLocal static var runtimeOverride: Runtime? }
-func withIsolatedRuntime<T>(_ body: () -> T) -> T
-func withIsolatedRuntime<T>(_ body: () async throws -> T) async rethrows -> T
-func withIsolatedRuntime<T>(using: Runtime, _ body: () -> T) -> T
-```
 
 ## Examples
 
@@ -208,9 +147,8 @@ func isolatedGraphs() async {
 }
 ```
 
-## Notes & roadmap
-* **Scheduler** — future: coalesce burst mutations into a single run loop pass.
-* **Deterministic order** — `Subscribers` currently uses an unordered `Set`.
+## Roadmap
+* **Scheduler**: coalesce burst mutations into a single run loop pass.
 
 ## License
 

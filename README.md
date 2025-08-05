@@ -6,9 +6,8 @@ Use `@Atom` for mutable state, `@Derived` for cached computations, and `Effect` 
 
 ---
 
-## Outline ▸ Quick links
+## Outline
 - [Ripple](#ripple)
-  - [Outline ▸ Quick links](#outline-quick-links)
   - [Features](#features)
   - [Installation](#installation)
     - [Swift Package Manager](#swift-package-manager)

@@ -2,7 +2,7 @@
 //  Created by Daniel Inoa on 8/4/25.
 //
 
-/// A property-wrapper that turns a stored variable into a **Ripple atom**.
+/// A convenience property-wrapper that stores an **AtomObject**.
 ///
 /// Declare mutable reactive state with ordinary Swift syntax:
 ///

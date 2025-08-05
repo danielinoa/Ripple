@@ -18,19 +18,18 @@ count += 1                // → title recomputes → effect runs
 ```
 
 ## Outline
-- [Ripple](#ripple)
-  - [Features](#features)
-  - [Installation](#installation)
+- [Features](#features)
+- [Installation](#installation)
     - [Swift Package Manager](#swift-package-manager)
-  - [Concepts](#concepts)
-  - [Testing & isolation](#testing--isolation)
-  - [Behavior details](#behavior-details)
-  - [Examples](#examples)
+- [Concepts](#concepts)
+- [Testing & isolation](#testing--isolation)
+- [Behavior details](#behavior-details)
+- [Examples](#examples)
     - [UIKit binding](#uikit-binding)
     - [Chained derived values](#chained-derived-values)
     - [Parallel-safe tests](#parallel-safe-tests)
-  - [Roadmap](#roadmap)
-  - [License](#license)
+- [Roadmap](#roadmap)
+- [License](#license)
 
 ## Features
 * **Ergonomic API**: `@Atom var count = 0`, `@Derived var title = "Count: \(count)"`.

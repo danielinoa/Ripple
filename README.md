@@ -1,7 +1,8 @@
 
 # Ripple
 
-A reactivity runtime for Swift that automatically records state while code runs, and **re-runs** dependents when those values change.
+A reactivity runtime for Swift that automatically tracks state, and **re-runs** dependents when state changes.
+
 Ripple is designed to run on the **main actor**.
 
 ```swift
